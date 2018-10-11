@@ -4,7 +4,7 @@
 #include <omp.h>
 #include <math.h>
 
-#define nTHREADS 10
+#define nTHREADS 1
 
 typedef struct points{
 	double x;
@@ -18,7 +18,7 @@ typedef struct frequency{
 	
 double odometer(Point p1, Point p2){
 	double distance;
-	distance = pow(p1.x-p2.x, 2) + pow(p1.y-p2.y, 2) + pow(p1.z-p2.z, 2);
+	distance = ((p1.x-p2.x) * (p1.x-p2.x)) + ((p1.y-p2.y) * (p1.y-p2.y)) + ((p1.z-p2.z)*(p1.z-p2.z));
 	return (sqrt(distance));
 	}
 	
@@ -26,7 +26,8 @@ void main(){
 
 	//opening file
 	FILE * fptr;
-	fptr = fopen("./test_data/cell_e5", "r");
+	double start_prog = omp_get_wtime();
+	fptr = fopen("./test_data/cell_e4", "r");
 	
 	//get number of coordintes in the file
 	int SIZE = 0;
@@ -56,9 +57,6 @@ void main(){
 	double start = omp_get_wtime();
 	//parsing file for necessary data	
 	omp_set_num_threads(nTHREADS);
-	//printf("number of threads: %d\n", omp_get_num_threads());
-	
-	
 	#pragma parallel for
 	for ( int loc = 0; loc < file_size; loc++ ){
 		switch ( file_buffer[loc] ) {
@@ -91,51 +89,45 @@ void main(){
 	fclose(fptr);
 		
 	//distance calculator
-	int n = ((SIZE/3) * ((SIZE-1)/3))/2;
+	int n = ((SIZE/3) * ((SIZE/3)-1))/2;
 	double distance = 0.0;
-	int dist_id = 0;
-	double * distances = (double*)malloc(sizeof(double) * n);
-	int * possibilities = (int*)malloc(sizeof(int) * 2001);
-	int temp = 0;
+	int * possibilities = (int*)malloc(sizeof(int) * 3465);
+
 	
+	omp_set_num_threads(nTHREADS);
+	double start_init = omp_get_wtime();
 	#pragma omp parallel for
-	for ( int m = 0; m<2001; m++){
-		possibilities[m] = 0;
+	for ( int x = 0; x<3465; x++){
+		possibilities[x] = 0;
 		}
-	printf("possibilities init complete\n");
+		
+	printf("possibilities init time: %lf \n", omp_get_wtime()-start_init);
 	
 	double start_distance = omp_get_wtime();
-	#pragma omp parallel for
+	int temp;
+	#pragma omp parallel for shared (possibilities)
 	for ( int i = 0; i<(SIZE/3); i++ ){
-		printf("number of threads in for %d \n", omp_get_num_threads());
 		for( int j = i+1; j <(SIZE/3); j++){
-			printf("%d\n", j);
+		
 			distance = odometer(points[i], points[j]);
-			#pragma omp critical
-			distances[dist_id++] = distance;	
-			
 			temp = (int)(distance*100);
 			possibilities[temp]++;
+			
 			}
 		}
 		
 	printf("Distance calculating time: %lf \n", omp_get_wtime()-start_distance);
-	
-	Frequency * outs = (Frequency *) malloc(sizeof(Frequency) * n);
-	int index = 0;
-	for ( int i = 0; i < 2001; i++){
+
+	#pragma omp for
+	for ( int i = 0; i < 3465; i++){
 		if(possibilities[i] != 0){
-			sprintf(outs[index++].length, "%.2lf,%d", i/100.0, possibilities[i]);
-			//printf("%s\n", outs[index-1].length);
+			//printf("%.2lf,%d \n", i/100.0, possibilities[i]);
 			}
 		}
+	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
-	//free(da);
-	free(distances);
-	free(outs);
 	free(file_buffer);
 	free(points);
-	
 	}
 	
 	
