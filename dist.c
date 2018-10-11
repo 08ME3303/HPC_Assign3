@@ -4,20 +4,14 @@
 #include <omp.h>
 #include <math.h>
 
-#define nTHREADS 1
-
-typedef struct points{
-	double x;
-	double y;
-	double z;
-	}Point;
+#define nTHREADS 5
 	
 void main(){
 
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./test_data/cell_e4", "r");
+	fptr = fopen("./test_data/cell_e5", "r");
 	
 	//get number of coordintes in the file
 	int SIZE = 0;
@@ -100,9 +94,10 @@ void main(){
 	double start_distance = omp_get_wtime();
 	int temp, i, j;
 	
-	omp_set_num_threads(nTHREADS);
+	/*omp_set_num_threads(nTHREADS);
 	#pragma omp parallel for shared (possibilities)
 	for ( i = 0; i<ROWS; i++ ){
+		omp_set_num_threads(nTHREADS);
 		#pragma omp parallel for shared (possibilities)
 		for( j = i+1; j <ROWS; j++){
 		
@@ -111,12 +106,46 @@ void main(){
 			possibilities[temp]++;
 			
 			}
+		}*/
+		
+	//approach 2
+	double * xpairs = (double *) malloc(sizeof(double) * n);
+	double * ypairs = (double *) malloc(sizeof(double) * n);
+	double * zpairs = (double *) malloc(sizeof(double) * n);
+	
+	printf("length of items %d\n", n);
+	
+	int m,l, id = 0;
+	printf("%d\n", ROWS);
+	
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for shared(id)
+	for ( m = 0; m <ROWS; m++){
+		//omp_set_num_threads(nTHREADS);
+		//#pragma omp parallel for shared(id)
+		for( l = m+1; l <ROWS; l++){
+			//printf("%d\n", id);
+			xpairs[id] = (x[m]-x[l])*(x[m]-x[l]);
+			ypairs[id] = (y[m]-y[l])*(y[m]-y[l]);
+			zpairs[id] = (z[m]-z[l])*(z[m]-z[l]);
+			id++;
+			}
 		}
+	
+
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for shared(possibilities)
+	for ( m = 0; m < id; m++){
+		distance = sqrt(xpairs[m] + ypairs[m] + zpairs[m]);
+		temp = (distance*100);
+		possibilities[temp]++;
+		}
+	
 		
 	printf("Distance calculating time: %lf \n", omp_get_wtime()-start_distance);
 	
 	omp_set_num_threads(nTHREADS);
-	#pragma omp for
+	#pragma omp parallel for
 	for ( int i = 0; i < 3465; i++){
 		if(possibilities[i] != 0){
 			//printf("%.2lf,%d \n", i/100.0, possibilities[i]);
