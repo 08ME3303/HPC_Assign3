@@ -6,8 +6,6 @@
 
 #define nTHREADS 1
 
-
-//learning how to synch 
 typedef struct points{
 	double x;
 	double y;
