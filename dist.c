@@ -94,7 +94,7 @@ void main(){
 	double start_distance = omp_get_wtime();
 	int i, j;
 	
-	omp_set_num_threads(nTHREADS);
+	/*omp_set_num_threads(nTHREADS);
 	#pragma omp parallel for //shared (possibilities)
 	for ( i = 0; i<ROWS; i++ ){
 		omp_set_num_threads(nTHREADS);
@@ -105,27 +105,24 @@ void main(){
 			possibilities[(int)(distance*100)]++;
 			
 			}
-		}
+		}*/
 		
 	//approach 2
-	/*double * xpairs = (double *) malloc(sizeof(double) * n);
-	double * ypairs = (double *) malloc(sizeof(double) * n);
-	double * zpairs = (double *) malloc(sizeof(double) * n);
+	double * xpairs = (double *) malloc(sizeof(double) * n);
+	//double * ypairs = (double *) malloc(sizeof(double) * n);
+	//double * zpairs = (double *) malloc(sizeof(double) * n);
 	
 	printf("length of items %d\n", n);
 	
 	int m,l, id = 0;
-	printf("%d\n", ROWS);*/
+	printf("%d\n", ROWS);
 	
-	/*omp_set_num_threads(nTHREADS);
+	omp_set_num_threads(nTHREADS);
 	#pragma omp parallel for
 	for ( m = 0; m <ROWS; m++){
+		#pragma omp parallel for
 		for( l = m+1; l <ROWS; l++){
-			//printf("%d\n", id);
-			xpairs[id] = (x[m]-x[l])*(x[m]-x[l]);
-			ypairs[id] = (y[m]-y[l])*(y[m]-y[l]);
-			zpairs[id] = (z[m]-z[l])*(z[m]-z[l]);
-			id++;
+			xpairs[id++] = (x[m]-x[l])*(x[m]-x[l]) + (y[m]-y[l])*(y[m]-y[l]) + (z[m]-z[l])*(z[m]-z[l]);
 			}
 		}
 	
@@ -133,9 +130,9 @@ void main(){
 	omp_set_num_threads(nTHREADS);
 	#pragma omp parallel for
 	for ( m = 0; m < id; m++){
-		distance = sqrt(xpairs[m] + ypairs[m] + zpairs[m]);
+		distance = sqrt(xpairs[m]);
 		possibilities[(int)(distance*100)]++;
-		}*/
+		}
 	
 		
 	printf("Distance calculating time: %lf \n", omp_get_wtime()-start_distance);
