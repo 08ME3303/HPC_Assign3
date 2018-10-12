@@ -108,14 +108,14 @@ void main(){
 		}
 		
 	//approach 2
-	double * xpairs = (double *) malloc(sizeof(double) * n);
+	/*double * xpairs = (double *) malloc(sizeof(double) * n);
 	double * ypairs = (double *) malloc(sizeof(double) * n);
 	double * zpairs = (double *) malloc(sizeof(double) * n);
 	
 	printf("length of items %d\n", n);
 	
 	int m,l, id = 0;
-	printf("%d\n", ROWS);
+	printf("%d\n", ROWS);*/
 	
 	/*omp_set_num_threads(nTHREADS);
 	#pragma omp parallel for
