@@ -4,14 +4,16 @@
 #include <omp.h>
 #include <math.h>
 
-#define nTHREADS 5
+#define nTHREADS 1
+
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 	
 void main(){
 
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./test_data/cell_e5", "r");
+	fptr = fopen("./test_data/cell_e4", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
@@ -43,6 +45,7 @@ void main(){
 	int row_id = 0, column = 0, char_id = 0;
 	
 	double start = omp_get_wtime();
+	
 	//parsing file for necessary data	
 	omp_set_num_threads(nTHREADS);
 	#pragma parallel for
@@ -97,45 +100,44 @@ void main(){
 	int i, j, k;
 	int blocks;
 	(ROWS<=1000)?(blocks = 1):(blocks = 100);
-	
-	/*for ( k =0; k < blocks; k++ ){
-		omp_set_num_threads(nTHREADS);
-		#pragma omp parallel for shared(x, y, z, ROWS, k, possibilities) private (i, j)
-		for ( i = k*blocks; i<((k*blocks) + (ROWS/blocks)); i++ ){
-			for( j = i+1; j <ROWS; j++){
-				distance = (sqrtf(((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j]))))*100; 
-				possibilities[distance]++;
-				}
-			}
-		}*/
 		
 	long long int num_ops = 0;
-
-	//omp_set_num_threads(nTHREADS);
-	//#pragma omp parallel for shared(x, y, z, ROWS, k, possibilities) private (i, j)
-	for ( i = 0; i < ROWS; i ++){
-		omp_set_num_threads(nTHREADS);
-		#pragma omp parallel for shared(x,y,z, ROWS, possibilities) private(k,j)
-		for ( k = 0; k < blocks; k++){
-			for( j = i+ k*blocks; j<((k*blocks) + (ROWS/blocks)); j++){
-				distance = (sqrtf(((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j]))))*100; 
-				possibilities[distance]++;
+		
+	float x1, y1, z1;
+	int iblock, imax, jblock, jmax;
+		
+	//distance calculator 
+	for ( iblock = 0; iblock < ROWS; iblock += blocks ){
+		imax = MIN(iblock + blocks, ROWS);
+		printf("%d\n", imax);
+		for ( jblock = 0; jblock < ROWS; jblock += blocks ){
+			jmax = MIN(jblock + blocks, ROWS-1);
+			
+			omp_set_num_threads(nTHREADS);
+			#pragma omp parallel for shared(x, y, z)
+			for ( i = iblock; i < imax; i++){
+				x1 = x[i];
+				y1 = y[i];
+				z1 = z[i];
+				for ( j = jblock+1; j <= jmax; j++ ){
+					num_ops += 1;
+					distance = (sqrtf(((x1-x[j]) * (x1-x[j])) + ((y1-y[j]) * (y1-y[j])) + ((z1-z[j])*(z1-z[j]))))*100; 
+					possibilities[distance]++;
 				}
 			}
 		}
-
-	
+	}
 		
 	printf("Distance calculating time: %lf \n", omp_get_wtime()-start_distance);
 	
+	//final printing operation
 	for ( int i = 0; i < 3465; i++){
 		if(possibilities[i] != 0){
-			num_ops += possibilities[i];
 			printf("%.2lf,%d \n", i/100.0, possibilities[i]);
 			}
 		}
 		
-	printf("Total distance operations done: %lld\n", num_ops);
+	printf("Total distance operations done: %lld, %lld\n", num_ops, num_ops/n);
 	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
 	free(file_buffer);
