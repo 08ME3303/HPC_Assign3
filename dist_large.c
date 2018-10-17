@@ -83,11 +83,9 @@ void main(){
 	//distance calculator
 	long long int n = (ROWS * (ROWS-1))/2;
 	printf("n: %lld\n", n);
-	//int distance = 0;
+	int distance = 0;
 	int * possibilities = (int*)malloc(sizeof(int) * 3465);
-	//float * temp = (float*)malloc(sizeof(float)*n);
-	//float temp[n];
-	
+
 	omp_set_num_threads(nTHREADS);
 	double start_init = omp_get_wtime();
 	#pragma omp parallel for
@@ -97,46 +95,70 @@ void main(){
 		
 	printf("possibilities init time: %lf \n", omp_get_wtime()-start_init);
 	
-	double start_distance = omp_get_wtime();
+	
+	//approach 1
 	int blocks;
 	(ROWS<=10000)?(blocks = 1):(blocks = 1000);
 		
 	long long int num_ops = 0;	
-	long long int k = 0;
-	int i,j, ind;
-	float r = 0.0, x1, y1, z1;
-	int distance;
-	int flag;
-	float * xyz;
+	int i,j;
+	float x1, y1, z1;
 	int iblock, imax, jblock, jmax, ix, jx, kx, mx;
-	float * temp = (float*) calloc(n/blocks, sizeof(float));
 	float temporary;
-
-	omp_set_num_threads(nTHREADS);
-	#pragma omp parallel for
+	float * temp = (float *) calloc(ROWS, sizeof(float));
+	double start_distance1 = omp_get_wtime();
 	for (iblock=0; iblock < ROWS; iblock+=blocks) {
  		imax = iblock + blocks < ROWS ? iblock + blocks : ROWS-1;
-		
 		
 	    for (ix=iblock; ix < imax; ix++){
 	    	x1 = x[ix];
 	    	y1 = y[ix];
 			z1 = z[ix];
+			
+			omp_set_num_threads(nTHREADS);
+			#pragma omp parallel for
   			for (jx=ix+1; jx < ROWS; jx++){
-  				temporary = (((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx])));
-  				distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
-				possibilities[distance]++;
+  				//temporary = (((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx])));
+  				temp[num_ops] = (((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx])))*10000;
+  				num_ops ++;
+  				//distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
+				//possibilities[distance]++;
   				}
+  			omp_set_num_threads(nTHREADS);
+  			#pragma omp parallel for
+  			for ( mx = 0; mx<num_ops; mx++){
+  				distance = 1/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temp[mx]))));
+  				possibilities[distance]++;
+  				}
+  			num_ops = 0;
   			}
 		}
-
+	double end_distance1 = omp_get_wtime();	
+	
+	
+	//approach 2
+	/*long long int k;
+	double start_distance2 = omp_get_wtime();
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for shared(x,y,z)
+	for ( k = 0; k < n; k++ ){
+		i = k/(ROWS), j = k%(ROWS);
+		if (j <= i ) i = ROWS-i-2, j = ROWS-j-1;
+		temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
+		distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
+		possibilities[distance]++;
+		}
+		
+	double end_distance2 = omp_get_wtime();*/
+	
 	for ( int i = 0; i < 3465; i++){
-		if(possibilities[i] != 0){
-			//dx += possibilities[i];
-			printf("%.2lf,%d \n", i/100.0, possibilities[i]);
+		if(possibilities[i] <= 1){
+			printf("%.2lf,%d \n", i/100.0, possibilities[i]-1);
 			}
 		}
 		
+	//printf("Time for first approach: %lf, Time for seccond approach: %lf\n", end_distance1-start_distance1, end_distance2-start_distance2);
+	printf("Time for distance calculations: %lf\n, end_distnace1-start_distance1);
 	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
 	free(file_buffer);
