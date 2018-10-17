@@ -5,7 +5,7 @@
 #include <math.h>
 #include <xmmintrin.h>
 
-#define nTHREADS 15
+#define nTHREADS 10
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 	
@@ -48,8 +48,6 @@ void main(){
 	double start = omp_get_wtime();
 	
 	//parsing file for necessary data	
-	omp_set_num_threads(nTHREADS);
-	#pragma parallel for
 	for ( int loc = 0; loc < file_size; loc++ ){
 		switch ( file_buffer[loc] ) {
 			case ' ' :
@@ -98,67 +96,88 @@ void main(){
 	
 	//approach 1
 	int blocks;
-	(ROWS<=10000)?(blocks = 1):(blocks = 1000);
+	(ROWS<=10000)?(blocks = 1):(blocks = 10000);
 		
 	long long int num_ops = 0;	
 	int i,j;
 	float x1, y1, z1;
 	int iblock, imax, jblock, jmax, ix, jx, kx, mx;
 	float temporary;
-	float * temp = (float *) calloc(ROWS, sizeof(float));
+	int * temp = (int *) calloc(ROWS, sizeof(int));
 	double start_distance1 = omp_get_wtime();
-	for (iblock=0; iblock < ROWS; iblock+=blocks) {
+	/*for (iblock=0; iblock < ROWS; iblock+=blocks) {
  		imax = iblock + blocks < ROWS ? iblock + blocks : ROWS-1;
 		
 	    for (ix=iblock; ix < imax; ix++){
 	    	x1 = x[ix];
 	    	y1 = y[ix];
-			z1 = z[ix];
+			z1 = z[ix];*/
 			
-			omp_set_num_threads(nTHREADS);
-			#pragma omp parallel for
+			/*omp_set_num_threads(nTHREADS);
+			#pragma omp parallel for schedule(dynamic, 10) 
   			for (jx=ix+1; jx < ROWS; jx++){
   				//temporary = (((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx])));
-  				temp[num_ops] = (((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx])))*10000;
+  				//temp[num_ops] = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
+  				//num_ops++;
+  				temp[num_ops] = sqrtf(((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx]))) * 100;
   				num_ops ++;
-  				//distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
-				//possibilities[distance]++;
   				}
   			omp_set_num_threads(nTHREADS);
-  			#pragma omp parallel for
+  			#pragma omp parallel for reduction(+:possibilities[:3465])
   			for ( mx = 0; mx<num_ops; mx++){
-  				distance = 1/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temp[mx]))));
+  				distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temp[mx]))));
+  				//distance = 100/temp[mx];
   				possibilities[distance]++;
   				}
-  			num_ops = 0;
+  			num_ops = 0;*/
+  			
+  			/*omp_set_num_threads(nTHREADS);
+  			#pragma omp parallel for schedule(dynamic,10) reduction(+:possibilities[:3465])
+  			for ( jx = ix+1; jx < ROWS; jx++){
+  				distance = 100*sqrtf(((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx])));
+  				possibilities[distance]++;
+  				}
   			}
+		}*/
+		
+		
+	for (iblock=0; iblock < ROWS; iblock+=blocks) {
+ 		imax = iblock + blocks < ROWS ? iblock + blocks : ROWS-1;
+ 		
+		omp_set_num_threads(nTHREADS);
+		#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
+		for ( i = iblock; i < imax; i++){
+			for ( j = i+1; j < ROWS; j++ ) {
+				temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
+				distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
+				//distance = 100*sqrtf(((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
+				possibilities[distance]++;
+				}
+			}
 		}
-	double end_distance1 = omp_get_wtime();	
-	
-	
-	//approach 2
+		
 	/*long long int k;
 	double start_distance2 = omp_get_wtime();
 	omp_set_num_threads(nTHREADS);
-	#pragma omp parallel for shared(x,y,z)
+	#pragma omp parallel for schedule(dynamic,10) reduction(+:possibilities[:3465])
 	for ( k = 0; k < n; k++ ){
 		i = k/(ROWS), j = k%(ROWS);
 		if (j <= i ) i = ROWS-i-2, j = ROWS-j-1;
 		temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
 		distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
 		possibilities[distance]++;
-		}
+		}*/
 		
-	double end_distance2 = omp_get_wtime();*/
+		
+	double end_distance1 = omp_get_wtime();	
 	
 	for ( int i = 0; i < 3465; i++){
-		if(possibilities[i] <= 1){
-			printf("%.2lf,%d \n", i/100.0, possibilities[i]-1);
+		if(possibilities[i] > 1){
+			//printf("%.2lf,%d \n", i/100.0, possibilities[i]-1);
 			}
 		}
 		
-	//printf("Time for first approach: %lf, Time for seccond approach: %lf\n", end_distance1-start_distance1, end_distance2-start_distance2);
-	printf("Time for distance calculations: %lf\n, end_distnace1-start_distance1);
+	printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
 	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
 	free(file_buffer);
