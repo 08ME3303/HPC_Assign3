@@ -99,7 +99,7 @@ void main(){
 	
 	double start_distance = omp_get_wtime();
 	int blocks;
-	(ROWS<=1000)?(blocks = 1):(blocks = 1000);
+	(ROWS<=10000)?(blocks = 1):(blocks = 1000);
 		
 	long long int num_ops = 0;	
 	long long int k = 0;
@@ -108,69 +108,37 @@ void main(){
 	int distance;
 	int flag;
 	float * xyz;
-	
-	(ROWS<=1e4)? (flag = 1) : (flag = 0); 
-	printf("All okay upto here with flag %d\n", flag);
-	
-	switch(flag){
-		case 0:
-			printf("Large file\n");
-			omp_set_num_threads(nTHREADS);
-			#pragma omp parallel for shared(x,y,z)
-			for ( k = 0; k < n; k++ ){
-				i = k/(ROWS), j = k%(ROWS);
-				if (j <= i ) i = ROWS-i-2, j = ROWS-j-1;
-				distance = (sqrtf(((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j]))))*100; 
-				#pragma omp critical
+	int iblock, imax, jblock, jmax, ix, jx, kx, mx;
+	float * temp = (float*) calloc(n/blocks, sizeof(float));
+	float temporary;
+
+	for (iblock=0; iblock < ROWS; iblock+=blocks) {
+ 		imax = iblock + blocks < ROWS ? iblock + blocks : ROWS-1;
+
+	    for (ix=iblock; ix < imax; ix++){
+	    	x1 = x[ix];
+	    	y1 = y[ix];
+			z1 = z[ix];
+  			for (jx=ix+1; jx < ROWS; jx++){
+  				temporary = (((x1-x[jx]) * (x1-x[jx])) + ((y1-y[jx]) * (y1-y[jx])) + ((z1-z[jx])*(z1-z[jx])));
+  				distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
 				possibilities[distance]++;
-				}
-		
-		case 1:
-			xyz = (float*)malloc(sizeof(float)*n);
-			for ( i = 0; i < ROWS; i++){
-				x1 = x[i]; 
-				y1 = y[i];
-				z1 = z[i];
-				for ( j = i+1; j < ROWS; j++){
-					xyz[k] = ((x1 - x[j])*(x1-x[j]) + (y1-y[j])*(y1-y[j]) + (z1 - z[j])*(z1-z[j]));
-					k++;
-					}
-				}
-			
-			for ( k = 0; k < n; k++ ){
-				ind = sqrtf(xyz[k])*100;
-				possibilities[ind]++;
-				}
-			free(xyz);
+  				}
+  			}
 		}
-			
-		
-	/*for ( k = 0; k < n; k++ ){
-		i = k/(ROWS), j = k%(ROWS);
-		if (j <= i ) i = ROWS - i -2, j = ROWS-j-1;
-		xyz[k] = ((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j]));
-		}*/
-	
-	//printf("%lf\n", temp[k]);
-	
-	//omp_set_num_threads(nTHREADS);
-	//#pragma omp parallel for shared(x,y,z)
-	
-	//final printing operation
+
 	for ( int i = 0; i < 3465; i++){
 		if(possibilities[i] != 0){
-			num_ops += possibilities[i];
-			//printf("%.2lf,%d \n", i/100.0, possibilities[i]);
+			//dx += possibilities[i];
+			printf("%.2lf,%d \n", i/100.0, possibilities[i]);
 			}
 		}
 		
-	printf("Total distance operations done: %lld, %lf\n", num_ops, (float)num_ops/n);
 	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
 	free(file_buffer);
+	free(temp);
 	free(x);
 	free(y);
 	free(z);
 	}
-	
-	
