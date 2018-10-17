@@ -5,7 +5,7 @@
 #include <math.h>
 #include <xmmintrin.h>
 
-#define nTHREADS 5
+#define nTHREADS 15
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 	
@@ -112,9 +112,12 @@ void main(){
 	float * temp = (float*) calloc(n/blocks, sizeof(float));
 	float temporary;
 
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for
 	for (iblock=0; iblock < ROWS; iblock+=blocks) {
  		imax = iblock + blocks < ROWS ? iblock + blocks : ROWS-1;
-
+		
+		
 	    for (ix=iblock; ix < imax; ix++){
 	    	x1 = x[ix];
 	    	y1 = y[ix];
