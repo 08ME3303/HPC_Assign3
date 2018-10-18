@@ -30,7 +30,6 @@ void main(int argc, char** argv){
    	}
    	
    	long ROWS = SIZE/3;
-   	printf("size %ld\t, rows %ld\n", SIZE, ROWS);
    	//get size of file
    	rewind(fptr);
    	fseek(fptr, 0, SEEK_END);
@@ -77,7 +76,7 @@ void main(int argc, char** argv){
 			}
 		}
 	
-	printf("File parsing time taken: %lf \n", omp_get_wtime()-start);	
+	//printf("File parsing time taken: %lf \n", omp_get_wtime()-start);	
 	fclose(fptr);
 		
 	//distance calculator
@@ -85,47 +84,46 @@ void main(int argc, char** argv){
 	int distance = 0;
 	int * possibilities = (int*)calloc(3465, sizeof(int));
 
-	int blocks;
-	(ROWS<=10000)?(blocks = 1):(blocks = 1000);
+	//int blocks;
+	//(ROWS<=10000)?(blocks = 1):(blocks = 1000);
 		
-	long long int num_ops = 0;	
+	//long long int num_ops = 0;	
 	int i,j;
 	float x1, y1, z1;
-	int iblock, imax;
+	//int iblock, imax;
 	float temporary;
-	int * temp = (int *) calloc(ROWS, sizeof(int));
 	double start_distance1 = omp_get_wtime();		
 		
-	for (iblock=0; iblock < ROWS; iblock+=blocks) {
- 		imax = iblock + blocks < ROWS ? iblock + blocks : ROWS-1;
- 		
-		omp_set_num_threads(nTHREADS);
-		#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
-		for ( i = iblock; i < imax; i++){
-			for ( j = i+1; j < ROWS; j++ ) {
-				temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
-				distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
-				possibilities[distance]++;
-				}
+	//for (iblock=0; iblock < ROWS; iblock+=blocks) {
+ 	//	imax = iblock + blocks < ROWS ? iblock + blocks : ROWS-1;
+	
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
+	for ( i = 0; i < ROWS; i++){
+		for ( j = i+1; j < ROWS; j++ ) {
+			temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
+			distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
+			possibilities[distance]++;
 			}
-		}		
+		}
+		//}		
 		
 	double end_distance1 = omp_get_wtime();
-	num_ops = 0;
+	//num_ops = 0;
 	
 	for ( int i = 0; i < 3465; i++){
 		if(possibilities[i] > 0){
-			num_ops+=possibilities[i];
-			//printf("%.2lf,%d \n", i/100.0, possibilities[i]);
+			//num_ops+=possibilities[i];
+			printf("%.2lf,%d \n", i/100.0, possibilities[i]);
 			}
 		}
 		
-	printf("%lld\n", num_ops);
+	// Debugging and benchmarking outputs
+	/*printf("%lld\n", num_ops);
 	printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
-	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
+	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);*/
 	
 	free(file_buffer);
-	free(temp);
 	free(x);
 	free(y);
 	free(z);
