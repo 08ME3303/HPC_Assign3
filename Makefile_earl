@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-c -Ofast -g
-EXECUTE=distance
+EXECUTE=cell_distance
 
 .PHONY : clean
 
