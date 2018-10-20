@@ -115,13 +115,13 @@ void main(int argc, char** argv){
 		
 	for ( int i = 0; i < 3465; i++){
 		//num_ops+=possibilities[i];
-		printf("%.2lf %d \n", i/100.0, possibilities[i]);
+		printf("%.2lf %d\n", i/100.0, possibilities[i]);
 		}
 		
 	// Debugging and benchmarking outputs
 	//printf("%lld\n", num_ops);
-	printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
-	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
+	//printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
+	//printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
 	free(file_buffer);
 	free(x);
