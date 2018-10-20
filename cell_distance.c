@@ -4,6 +4,23 @@
 #include <omp.h>
 #include <math.h>
 #include <xmmintrin.h>
+
+typedef struct points{
+	float x;
+	float y;
+	float z;
+	}points;
+
+int roundoff ( float base ){
+	int temp;
+	if (((int)base*1000)%10 >=5){
+		temp = (base*100)+1;
+		}
+	else{
+		temp = (base*100);
+		}
+	return temp;
+	}
 	
 void main(int argc, char** argv){
 	
@@ -19,8 +36,8 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./cells", "r");
-	
+	//fptr = fopen("./cells", "r");
+	fptr = fopen("./test_data/cell_e5", "r");
 	//get number of coordintes in the file
 	long SIZE = 0;
    	char ch;
@@ -41,6 +58,7 @@ void main(int argc, char** argv){
 	size_t result = fread ( file_buffer, 1, file_size, fptr );
 	
 	//array of points
+	points * Point = (points*)malloc(sizeof(points)*ROWS);
 	float * x = (float*)malloc(sizeof(float)*ROWS);
 	float * y = (float*)malloc(sizeof(float)*ROWS);
 	float * z = (float*)malloc(sizeof(float)*ROWS);
@@ -63,9 +81,12 @@ void main(int argc, char** argv){
 			if (file_buffer[loc] == c2){
 				rows[column] = atof(char_buff);
 				column = 0;
-				x[row_id] = rows[0];
-				y[row_id] = rows[1];
-				z[row_id] = rows[2];
+				Point[row_id].x = rows[0];
+				Point[row_id].y = rows[1];
+				Point[row_id].z = rows[2];
+				//x[row_id] = rows[0];
+				//y[row_id] = rows[1];
+				//z[row_id] = rows[2];
 				row_id++;
 				char_id = 0;
 				}
@@ -76,7 +97,7 @@ void main(int argc, char** argv){
 			}
 		}
 	
-	//printf("File parsing time taken: %lf \n", omp_get_wtime()-start);	
+	printf("File parsing time taken: %lf \n", omp_get_wtime()-start);	
 	fclose(fptr);
 		
 	//distance calculator
@@ -95,35 +116,32 @@ void main(int argc, char** argv){
 	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 	for ( i = 0; i < ROWS; i++){
 		for ( j = i+1; j < ROWS; j++ ) {
-			temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
-			distance = 100*sqrt(temporary);
-			//distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
+			temporary = (pow((Point[i].x - Point[j].x),2) + pow((Point[i].y-Point[j].y),2) + pow((Point[i].z-Point[j].z),2));
+			//temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
+			//distance = 100*sqrtf(temporary);
+			distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 			possibilities[distance]++;
+			//distance = roundoff(1/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary)))));
+			//possibilities1[distance]++;
 			}
 		}	
 		
 	double end_distance1 = omp_get_wtime();
 	//num_ops = 0;
-	
-	/*for ( int i = 0; i < 3465; i++){
-		if(possibilities[i] > 0){
-			//num_ops+=possibilities[i];
-			printf("%.2lf %d \n", i/100.0, possibilities[i]);
-			}
-		}*/
-		
 		
 	for ( int i = 0; i < 3465; i++){
 		//num_ops+=possibilities[i];
+		//printf("%d \n", possibilities[i]-possibilities1[i]);
 		printf("%.2lf %d\n", i/100.0, possibilities[i]);
 		}
 		
 	// Debugging and benchmarking outputs
 	//printf("%lld\n", num_ops);
-	//printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
-	//printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
+	printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
+	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
 	free(file_buffer);
+	free(Point);
 	free(x);
 	free(y);
 	free(z);
