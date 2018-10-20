@@ -1,0 +1,16 @@
+CC=gcc
+CFLAGS=-c -Ofast -g
+EXECUTE=cell_distance
+
+.PHONY : clean
+
+$(EXECUTE): $(EXECUTE).o
+	$(CC) -o $(EXECUTE) $(EXECUTE).o -lm
+
+$(EXECUTE).o: $(EXECUTE).c
+	$(CC) $(CFLAGS) $(EXECUTE).c -lm
+
+
+clean :
+	 rm -f $(EXECUTE).o $(EXECUTE)
+
