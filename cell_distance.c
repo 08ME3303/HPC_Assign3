@@ -96,8 +96,8 @@ void main(int argc, char** argv){
 	for ( i = 0; i < ROWS; i++){
 		for ( j = i+1; j < ROWS; j++ ) {
 			temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
-			//distance = 100*sqrt(temporary);
-			distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
+			distance = 100*sqrt(temporary);
+			//distance = 100/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary))));
 			possibilities[distance]++;
 			}
 		}	
