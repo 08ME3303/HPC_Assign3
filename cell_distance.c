@@ -59,9 +59,9 @@ void main(int argc, char** argv){
 	
 	//array of points
 	points * Point = (points*)malloc(sizeof(points)*ROWS);
-	float * x = (float*)malloc(sizeof(float)*ROWS);
-	float * y = (float*)malloc(sizeof(float)*ROWS);
-	float * z = (float*)malloc(sizeof(float)*ROWS);
+	//float * x = (float*)malloc(sizeof(float)*ROWS);
+	//float * y = (float*)malloc(sizeof(float)*ROWS);
+	//float * z = (float*)malloc(sizeof(float)*ROWS);
 	
 	char char_buff[10];
 	float rows[3] = {0.0, 0.0, 0.0};
@@ -97,7 +97,7 @@ void main(int argc, char** argv){
 			}
 		}
 	
-	printf("File parsing time taken: %lf \n", omp_get_wtime()-start);	
+	//printf("File parsing time taken: %lf \n", omp_get_wtime()-start);	
 	fclose(fptr);
 		
 	//distance calculator
@@ -142,7 +142,7 @@ void main(int argc, char** argv){
 	
 	free(file_buffer);
 	free(Point);
-	free(x);
-	free(y);
-	free(z);
+	//free(x);
+	//free(y);
+	//free(z);
 	}
