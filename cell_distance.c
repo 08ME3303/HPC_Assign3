@@ -19,7 +19,7 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./test_data/cell_e5", "r");
+	fptr = fopen("./test_data/cells", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
@@ -119,9 +119,9 @@ void main(int argc, char** argv){
 		}
 		
 	// Debugging and benchmarking outputs
-	/*printf("%lld\n", num_ops);
+	//printf("%lld\n", num_ops);
 	printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
-	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);*/
+	printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
 	free(file_buffer);
 	free(x);
