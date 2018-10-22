@@ -134,6 +134,7 @@ void main(int argc, char** argv){
 			//printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 			
 			free(file_buffer);
+			free(possibilities);
 			free(Point);
 			}
 		else{
