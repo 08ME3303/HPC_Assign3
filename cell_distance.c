@@ -37,7 +37,7 @@ void main(int argc, char** argv){
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
 	fptr = fopen("./cells", "r");
-	//fptr = fopen("./test_data/cell_e5", "r");
+	//fptr = fopen("./test_data/cell_50", "r");
 	//get number of coordintes in the file
 	long SIZE = 0;
    	char ch;
@@ -59,9 +59,6 @@ void main(int argc, char** argv){
 	
 	//array of points
 	points * Point = (points*)malloc(sizeof(points)*ROWS);
-	//float * x = (float*)malloc(sizeof(float)*ROWS);
-	//float * y = (float*)malloc(sizeof(float)*ROWS);
-	//float * z = (float*)malloc(sizeof(float)*ROWS);
 	
 	char char_buff[10];
 	float rows[3] = {0.0, 0.0, 0.0};
@@ -84,9 +81,6 @@ void main(int argc, char** argv){
 				Point[row_id].x = rows[0];
 				Point[row_id].y = rows[1];
 				Point[row_id].z = rows[2];
-				//x[row_id] = rows[0];
-				//y[row_id] = rows[1];
-				//z[row_id] = rows[2];
 				row_id++;
 				char_id = 0;
 				}
@@ -117,12 +111,8 @@ void main(int argc, char** argv){
 	for ( i = 0; i < ROWS; i++){
 		for ( j = i+1; j < ROWS; j++ ) {
 			temporary = (pow((Point[i].x - Point[j].x),2) + pow((Point[i].y-Point[j].y),2) + pow((Point[i].z-Point[j].z),2));
-			//temporary = (((x[i]-x[j]) * (x[i]-x[j])) + ((y[i]-y[j]) * (y[i]-y[j])) + ((z[i]-z[j])*(z[i]-z[j])));
-			//distance = 100*sqrtf(temporary);
 			distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 			possibilities[distance]++;
-			//distance = roundoff(1/(_mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ss(temporary)))));
-			//possibilities1[distance]++;
 			}
 		}	
 		
@@ -130,8 +120,6 @@ void main(int argc, char** argv){
 	//num_ops = 0;
 		
 	for ( int i = 0; i < 3465; i++){
-		//num_ops+=possibilities[i];
-		//printf("%d \n", possibilities[i]-possibilities1[i]);
 		printf("%.2lf %d\n", i/100.0, possibilities[i]);
 		}
 		
@@ -142,7 +130,4 @@ void main(int argc, char** argv){
 	
 	free(file_buffer);
 	free(Point);
-	//free(x);
-	//free(y);
-	//free(z);
 	}
