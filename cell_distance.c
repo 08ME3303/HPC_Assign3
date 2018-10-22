@@ -160,7 +160,6 @@ void main(int argc, char** argv){
 				column = 0;
 				row_id = 0;
 				char_id = 0;
-				points * Point1 = (points*) calloc(block1, sizeof(points));
 				
 				for ( int loc = 0; loc < imax-iblock; loc++){
 					if (file_buffer[loc] == c1){
@@ -190,7 +189,6 @@ void main(int argc, char** argv){
 					jmax = (jblock+block1>file_size)?(file_size):(jblock+block1);
 					fseek(fptr, jblock, SEEK_SET);
 					size_t resultj = fread ( file_buffer_2, 1, jmax, fptr);
-					points * Point2 = (points*) calloc(block1, sizeof(points));
 					
 					column = 0;
 					int row_id_1 = 0;
@@ -234,6 +232,8 @@ void main(int argc, char** argv){
 			
 			free(Point1);
 			free(Point2);
+			free(file_buffer);
+			free(file_buffer_2);
 			free(possibilities);
 		}
 	}
