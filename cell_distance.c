@@ -56,7 +56,7 @@ void main(int argc, char** argv){
 	
 	char capacity = (file_size>1e7)?('l'):('s');
 	
-	if ( capacity == 's'){
+	//if ( capacity == 's'){
 			//printf("entered small file handling\n");
 			//read contents of file
 			char * file_buffer = (char*) malloc(sizeof(char) * file_size);
@@ -136,7 +136,7 @@ void main(int argc, char** argv){
 			free(file_buffer);
 			free(possibilities);
 			free(Point);
-			}
+			/*}
 		else{
 			long block1 = 0.1*file_size;
 			points * Point1 = (points*) malloc(sizeof(points)*block1);
@@ -235,5 +235,5 @@ void main(int argc, char** argv){
 			free(file_buffer);
 			free(file_buffer_2);
 			free(possibilities);
-		}
+		}*/
 	}
