@@ -38,7 +38,7 @@ void main(int argc, char** argv){
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
 	fptr = fopen("./cells", "r");
-	//fptr = fopen("./test_data/cell_e4", "r");
+	//fptr = fopen("./test_data/cell_e5", "r");
 	//get number of coordintes in the file
 	long SIZE = 0;
    	char ch;
@@ -57,6 +57,7 @@ void main(int argc, char** argv){
 	char capacity = (file_size>1e7)?('l'):('s');
 	
 	if ( capacity == 's'){
+			//printf("entered small file handling\n");
 			//read contents of file
 			char * file_buffer = (char*) malloc(sizeof(char) * file_size);
 			size_t result = fread ( file_buffer, 1, file_size, fptr );
@@ -228,7 +229,7 @@ void main(int argc, char** argv){
 					}
 				}
 			
-			printf("File closed\n");
+			//printf("File closed\n");
 			
 			free(Point1);
 			free(Point2);
