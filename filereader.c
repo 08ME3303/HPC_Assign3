@@ -4,8 +4,6 @@
 #include <omp.h>
 #include <math.h>
 
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-
 typedef struct points{
 	float x;
 	float y;
@@ -50,15 +48,11 @@ void main(int argc, char**argv){
 	points * Point1 = (points*) malloc(sizeof(points)*block1);
 	points * Point2 = (points*) malloc(sizeof(points)*block1);
 	int * possibilities = (int *) calloc(3465, sizeof(int));
-	printf("%ld, %ld\n", file_size, (block1));
-	
-	//FILE * fptr2;
-	//fptr2 = fopen("./test_data/cells_e3", "r");
    	
    	//read contents of file
 	char * file_buffer = (char*) malloc(sizeof(char) * block1);
 	char * file_buffer_2 = (char*) malloc(sizeof(char) * block1);
-	//size_t result = fread ( file_buffer, 1, file_size, fptr );
+
 	char char_buff[10];
 	float rows[3] = {0.0, 0.0, 0.0};
 	float rows1[3] = {0.0,0.0,0.0};
@@ -67,7 +61,6 @@ void main(int argc, char**argv){
 	
 	for ( int iblock = 0; iblock < file_size; iblock += block1 ){
 		imax = (iblock+block1>file_size)?(file_size):(iblock+block1);
-		printf("//%d\n", iblock);
 		fseek(fptr, iblock, SEEK_SET);
 		size_t result = fread ( file_buffer, 1, imax, fptr );
 		column = 0;
@@ -88,7 +81,6 @@ void main(int argc, char**argv){
 					Point1[row_id].x = rows[0];
 					Point1[row_id].y = rows[1];
 					Point1[row_id].z = rows[2];
-					printf("%d -------------------%f %f %f\n",iblock, Point1[row_id].x, Point1[row_id].y, Point1[row_id].z);
 					row_id++;
 					char_id = 0;
 					}
@@ -100,13 +92,10 @@ void main(int argc, char**argv){
 			}
 		fseek(fptr, 0, SEEK_SET);
 		
-		//printf("//%c\n", file_buffer[0]);
 		for ( int jblock =0; jblock < file_size; jblock += block1 ){
 			jmax = (jblock+block1>file_size)?(file_size):(jblock+block1);
-			//printf("====%d\n", jblock);
 			fseek(fptr, jblock, SEEK_SET);
 			size_t resultj = fread ( file_buffer_2, 1, jmax, fptr);
-			//printf("====\t%c\n", file_buffer_2[0]);
 			points * Point2 = (points*) calloc(block1, sizeof(points));
 			
 			column = 0;
@@ -114,7 +103,6 @@ void main(int argc, char**argv){
 			char_id = 0;
 
 			for ( int l = 0; l < jmax-jblock; l++){
-				//printf("second parsing operation --------------------%d, %d, %d\n", l, jblock, jmax);
 				if (file_buffer_2[l] == c1){
 					rows[column] = atof(char_buff);
 					column++;
@@ -124,13 +112,11 @@ void main(int argc, char**argv){
 					if (file_buffer_2[l] == c2){
 						rows[column] = atof(char_buff);
 						column = 0;
-						printf("%f, %d\n",rows[0], row_id);
 						Point2[row_id_1].x = rows[0];
 						Point2[row_id_1].y = rows[1];
 						Point2[row_id_1].z = rows[2];
 						row_id_1++;
 						char_id = 0;
-						printf("%d %d %f %f %f\n", jblock, l, Point2[row_id-1].x, Point2[row_id-1].y, Point2[row_id-1].z);
 						}
 					else{
 						char_buff[char_id] = file_buffer_2[l];
@@ -139,12 +125,7 @@ void main(int argc, char**argv){
 					}
 				}
 			distcalc(row_id, row_id, Point1, Point2, possibilities);
-			//free(Point2);
-			//printf("Point2 freed\n");
 			}
-		//printf("exit point2 for\n");
-		//free(Point1);
-		//printf("Point1 freed\n");
 		}
 		
 	fclose(fptr);
