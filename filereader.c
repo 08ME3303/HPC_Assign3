@@ -27,7 +27,7 @@ void main(int argc, char**argv){
 	printf("%d\n", argc);
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./test_data/cell_50", "r");
+	fptr = fopen("./cells", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
