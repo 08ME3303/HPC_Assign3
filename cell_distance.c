@@ -129,6 +129,7 @@ void main(int argc, char** argv){
 	//printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
 	//printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 	
+	free(possibilities);
 	free(file_buffer);
 	free(Point);
 	}
