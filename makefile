@@ -11,4 +11,4 @@ cell_distance.o: cell_distance.c
 	
 clean :
 	rm -f cell_distance.o cell_distance
-	rm -R extracted/ reports/ distances/
+	rm -r extracted/ reports/ distances/
