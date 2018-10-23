@@ -10,5 +10,4 @@ cell_distance.o: cell_distance.c
 	$(CC) $(CFLAGS) cell_distance.c
 	
 clean :
-	rm -f cell_distance.o cell_distance
-	rm -rf extracted/ reports/ distances/
+	rm -rf cell_distance.o cell_distance extracted/ reports/ distances/
