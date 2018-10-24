@@ -6,9 +6,12 @@
 #include <xmmintrin.h>
 
 typedef struct points{
-	int x;
-	int y;
-	int z;
+	//int x;
+	//int y;
+	//int z;
+	short x;
+	short y;
+	short z;
 	}points;
 	
 void distcalc( int row_1, int row_2, points * Point1, points * Point2, int * possibilities){
