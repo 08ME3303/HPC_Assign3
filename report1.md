@@ -156,13 +156,23 @@ if(j==dimension-1)
 
 }}  
   ~~~
-  
- 
+# 2.5 Parallization
+The parallel processing is implemented with OpenMP. The task to be parallelized
+is the nested for loop which handles the distance calculation and the
+frequency update. The OpenMP construct, #pragma omp parallel for, handles
+the parallel execution of the nested for loop. The option schedule(dynamic, 10)
+is added to break the for loops in chunks of dynamic size ( since the nested for
+4 is a triangular nested for loop ). The option reduction(+:possibilities[3465]) is
+added to ensure the proper update of the frequency. This also helps avoid running
+that line in critical mode which would serialize the execution and nullifies
+the parallel processing.
 
+# 3 Benchmarking
+The target for the assignment was to complete the execution of the program for
+1e4 and 1e5 file sizes for 1, 5, 10 and 15 threads. The actual times listed are
+the average over 10 executions of the program. The target times and the actual
+times are listed below:
 
-
-## Benchmarks
-### Single thread with 1000 lines 
 
 |FileSize    | No of Threads       |    TargetTime(sec)   | Actual Time(sec)        | 
 |:-----------|:-------------------:|:--------------------:|:-----------------------:|
