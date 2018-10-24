@@ -120,7 +120,6 @@ points * Point2 = (points*)malloc(sizeof(points)*block1);
   ~~~
   
   
-  
   The coordinates are defined as a stuct with 3 float variables for x, y and z co-
 ordinates. The parsed co-ordinates are allocated on the heap (using malloc()).
 This ensures contiguous allocation of memory allowing faster read and traversal.
@@ -138,45 +137,45 @@ points * Point = (points*)malloc(sizeof(points)*ROWS);
 the total memory usage. Hence the smallest data type to suit each application
 was chosen.
   
+# 2.5 Parallization
+The parallel processing is implemented with OpenMP. The task to be parallelized
+is the nested for loop which handles the distance calculation and the
+frequency update. The OpenMP construct, #pragma omp parallel for, handles
+the parallel execution of the nested for loop. The option schedule(dynamic, 10)
+is added to break the for loops in chunks of dynamic size ( since the nested for
+4 is a triangular nested for loop ). The option reduction(+:possibilities[3465]) is
+added to ensure the proper update of the frequency. This also helps avoid running
+that line in critical mode which would serialize the execution and nullifies
+the parallel processing.
+~~~ 
+omp_set_num_threads(nTHREADS);
+#pragma omp parallel for schedule(dynamic, 10)
+reduction(+:possibilities[:3465])
+for ( i = 0; i < ROWS; i++){
+for ( j = i+1; j < ROWS; j++ ) {
+temporary = (pow((Point[i].x - Point[j].x),2) +
+pow((Point[i].y-Point[j].y),2) +
+pow((Point[i].z-Point[j].z),2));
+distance =
+100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
+possibilities[distance]++;
+}
+}
+~~~ 
+
+# 3 Benchmarking
+The target for the assignment was to complete the execution of the program for
+1e4 and 1e5 file sizes for 1, 5, 10 and 15 threads. The actual times listed are
+the average over 10 executions of the program. The target times and the actual
+times are listed below:
+
+
+|FileSize    | No of Threads       |    TargetTime(sec)   | Actual Time(sec)        | 
+|:-----------|:-------------------:|:--------------------:|:-----------------------:|
+|1e4 	     | 1                   |  0.41                | 0.27                    | 
+|1e5 	     | 5                   |  8.20                | 4.59                    | 
+|1e5 	     | 10                  |  4.10                | 2.34                    | 
+|1e5 	     | 20                  |  2.60                | 1.49                    | 
+
+
  
- 
-
-
-
-
-
-## Benchmarks
-### Single thread with 1000 lines 
-
-|Polynomial  | 1       | 2       |5        |7        | 
-|:-----------|:-------:|--------:|:-------:|--------:|
-|Actual time | 0.073   |  0.125  | 0.285   | 0.496   |
-|Max runtime | 1.01    | 1.48    | 1.52    | 1.64    |
-
-
-
-
-### Multi-threaded with 1000 lines and polynomial x^5-1
-
-|Threads     | 1       | 2       |3        |4        | 
-|:-----------|:-------:|--------:|:-------:|--------:|
-|Actual time | 0.285   |  0.148  | 0.104   | 0.078   |
-|Max runtime | 1.52    | 0.70    | 0.55    | 0.42    |
-
-
-
-### 10 Threads and polynomial degree of 7
-
-|Lines        | 1000    | 50000  |
-|:------------|:-------:|-------:|
-|Actual time  | 0.058   |121.192 |
-|Max runtime  | 0.26    |594     |
-
-
-
- Single thread  (Degree of Polynomial vs Time in sec): ![gras](reportextra/1.jpg)
- 
- 
- Multiple thread(No of threads vs Time in sec): ![gras](reportextra/2.jpg)	
-
-
