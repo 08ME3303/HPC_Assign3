@@ -166,6 +166,21 @@ is added to break the for loops in chunks of dynamic size ( since the nested for
 added to ensure the proper update of the frequency. This also helps avoid running
 that line in critical mode which would serialize the execution and nullifies
 the parallel processing.
+~~~ 
+omp_set_num_threads(nTHREADS);
+#pragma omp parallel for schedule(dynamic, 10)
+reduction(+:possibilities[:3465])
+for ( i = 0; i < ROWS; i++){
+for ( j = i+1; j < ROWS; j++ ) {
+temporary = (pow((Point[i].x - Point[j].x),2) +
+pow((Point[i].y-Point[j].y),2) +
+pow((Point[i].z-Point[j].z),2));
+distance =
+100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
+possibilities[distance]++;
+}
+}
+~~~ 
 
 # 3 Benchmarking
 The target for the assignment was to complete the execution of the program for
