@@ -6,9 +6,9 @@
 #include <xmmintrin.h>
 
 typedef struct points{
-	float x;
-	float y;
-	float z;
+	int x;
+	int y;
+	int z;
 	}points;
 	
 void distcalc( int row_1, int row_2, points * Point1, points * Point2, int * possibilities){
@@ -55,7 +55,7 @@ void main(int argc, char** argv){
 	fseek(fptr, 0, SEEK_SET);
 	
 	char capacity = (file_size>1e7)?('l'):('s');
-	
+	//printf("%c, %ld\n", capacity, file_size);
 	if ( capacity == 's'){
 			//printf("entered small file handling\n");
 			//read contents of file
@@ -83,9 +83,9 @@ void main(int argc, char** argv){
 					if (file_buffer[loc] == c2){
 						rows[column] = atof(char_buff);
 						column = 0;
-						Point[row_id].x = rows[0];
-						Point[row_id].y = rows[1];
-						Point[row_id].z = rows[2];
+						Point[row_id].x = rows[0]*1000;
+						Point[row_id].y = rows[1]*1000;
+						Point[row_id].z = rows[2]*1000;
 						row_id++;
 						char_id = 0;
 						}
@@ -115,7 +115,7 @@ void main(int argc, char** argv){
 			#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 			for ( i = 0; i < ROWS; i++){
 				for ( j = i+1; j < ROWS; j++ ) {
-					temporary = (pow((Point[i].x - Point[j].x),2) + pow((Point[i].y-Point[j].y),2) + pow((Point[i].z-Point[j].z),2));
+					temporary = (pow((Point[i].x/1000.0 - Point[j].x/1000.0),2) + pow((Point[i].y/1000.0-Point[j].y/1000.0),2) + pow((Point[i].z/1000.0-Point[j].z/1000.0),2));
 					distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 					possibilities[distance]++;
 					}
@@ -133,19 +133,30 @@ void main(int argc, char** argv){
 			//printf("Time for distance calculations: %lf\n", end_distance1-start_distance1);
 			//printf("Total program time: %lf\n", omp_get_wtime()-start_prog);
 			
+			/*FILE * rptr;
+			rptr = fopen("./new", "wb");
+			fwrite(Point, sizeof(points), ROWS, rptr);
+			fclose(rptr);*/
+			
 			free(file_buffer);
 			free(possibilities);
 			free(Point);
 			}
 		else{
 			long block1 = 0.1*file_size;
+			printf("%ld\n", block1);
 			points * Point1 = (points*) malloc(sizeof(points)*block1);
 			points * Point2 = (points*) malloc(sizeof(points)*block1);
 			int * possibilities = (int *) calloc(3465, sizeof(int));
 		   	
 		   	//read contents of file
-			char * file_buffer = (char*) malloc(sizeof(char) * block1);
-			char * file_buffer_2 = (char*) malloc(sizeof(char) * block1);
+//			char * file_buffer = (char*) malloc(sizeof(char) * 1.1*block1);
+			char file_buffer[block1];
+//			char * file_buffer_2 = (char*) malloc(1.1*block1 * sizeof(char));
+			//char file_buffer_2[block1];
+			char file_buffer_2[block1];
+			
+			printf("file read\n");
 
 			char char_buff[10];
 			float rows[3] = {0.0, 0.0, 0.0};
@@ -186,8 +197,12 @@ void main(int argc, char** argv){
 				fseek(fptr, 0, SEEK_SET);
 				
 				for ( int jblock =0; jblock < file_size; jblock += block1 ){
+					//printf("Entered second/////////// %d\n", jblock);
 					jmax = (jblock+block1>file_size)?(file_size):(jblock+block1);
+					printf("%d\n", jmax);
 					fseek(fptr, jblock, SEEK_SET);
+					printf("File set with %d\n", jmax-jblock);
+					//char * file_buffer_2 = (char*) calloc(block1, sizeof(char));
 					size_t resultj = fread ( file_buffer_2, 1, jmax, fptr);
 					
 					column = 0;
@@ -195,18 +210,20 @@ void main(int argc, char** argv){
 					char_id = 0;
 
 					for ( int l = 0; l < jmax-jblock; l++){
+						//printf("%d --------- second parse\n", l);
 						if (file_buffer_2[l] == c1){
-							rows[column] = atof(char_buff);
+							rows1[column] = atof(char_buff);
 							column++;
 							char_id = 0;
 							}
 						else{
 							if (file_buffer_2[l] == c2){
-								rows[column] = atof(char_buff);
+								rows1[column] = atof(char_buff);
 								column = 0;
-								Point2[row_id_1].x = rows[0];
-								Point2[row_id_1].y = rows[1];
-								Point2[row_id_1].z = rows[2];
+								Point2[row_id_1].x = rows1[0];
+								Point2[row_id_1].y = rows1[1];
+								Point2[row_id_1].z = rows1[2];
+								//printf("%f %f %f \n", Point2[row_id_1].x,Point2[row_id_1].y,Point2[row_id_1].z);
 								row_id_1++;
 								char_id = 0;
 								}
@@ -216,6 +233,8 @@ void main(int argc, char** argv){
 								}
 							}
 						}
+					//printf("Doing distance calculations for %d, %d\n", iblock, jblock);
+					//free(file_buffer_2);
 					distcalc(row_id, row_id, Point1, Point2, possibilities);
 					}
 				}
@@ -232,8 +251,10 @@ void main(int argc, char** argv){
 			
 			free(Point1);
 			free(Point2);
-			free(file_buffer);
-			free(file_buffer_2);
+			printf("Problem free\n");
+			//free(file_buffer);
+			//printf("Problem free 1\n");
+			//free(file_buffer_2);
 			free(possibilities);
 		}
 	}

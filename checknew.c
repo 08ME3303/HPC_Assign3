@@ -54,7 +54,7 @@ void main(int argc, char** argv){
 	long file_size = ftell(fptr);
 	fseek(fptr, 0, SEEK_SET);
 	
-	char capacity = (file_size>1e7)?('l'):('s');
+	char capacity = (file_size>1e3)?('l'):('s');
 	
 	if ( capacity == 's'){
 			//read contents of file
@@ -142,8 +142,10 @@ void main(int argc, char** argv){
 			int * possibilities = (int *) calloc(3465, sizeof(int));
 		   	
 		   	//read contents of file
-			char * file_buffer = (char*) malloc(sizeof(char) * block1);
-			char * file_buffer_2 = (char*) malloc(sizeof(char) * block1);
+			//char * file_buffer = (char*) malloc(sizeof(char) * block1);
+			char file_buffer[block1];
+			//char * file_buffer_2 = (char*) malloc(sizeof(char) * block1);
+			char file_buffer_2[block1];
 
 			char char_buff[10];
 			float rows[3] = {0.0, 0.0, 0.0};
