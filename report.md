@@ -137,7 +137,7 @@ points * Point = (points*)malloc(sizeof(points)*ROWS);
 the total memory usage. Hence the smallest data type to suit each application
 was chosen.
   
-# 2.5 Parallization
+# Parallization
 The parallel processing is implemented with OpenMP. The task to be parallelized
 is the nested for loop which handles the distance calculation and the
 frequency update. The OpenMP construct, #pragma omp parallel for, handles
@@ -163,7 +163,7 @@ possibilities[distance]++;
 }
 ~~~ 
 
-# 3 Benchmarking
+# Benchmarking
 The target for the assignment was to complete the execution of the program for
 1e4 and 1e5 file sizes for 1, 5, 10 and 15 threads. The actual times listed are
 the average over 10 executions of the program. The target times and the actual
