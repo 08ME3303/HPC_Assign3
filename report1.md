@@ -158,44 +158,18 @@ if(j==dimension-1)
   ~~~
   
  
- 
-
-
 
 
 
 ## Benchmarks
 ### Single thread with 1000 lines 
 
-|Polynomial  | 1       | 2       |5        |7        | 
-|:-----------|:-------:|--------:|:-------:|--------:|
-|Actual time | 0.073   |  0.125  | 0.285   | 0.496   |
-|Max runtime | 1.01    | 1.48    | 1.52    | 1.64    |
+|FileSize    | No of Threads       |    TargetTime(sec)   | Actual Time(sec)        | 
+|:-----------|:-------------------:|:--------------------:|:-----------------------:|
+|1e4 	     | 1                   |  0.41                | 0.27                    | 
+|1e5 	     | 5                   |  8.20                | 4.59                    | 
+|1e5 	     | 10                  |  4.10                | 2.34                    | 
+|1e5 	     | 20                  |  2.60                | 1.49                    | 
 
-
-
-
-### Multi-threaded with 1000 lines and polynomial x^5-1
-
-|Threads     | 1       | 2       |3        |4        | 
-|:-----------|:-------:|--------:|:-------:|--------:|
-|Actual time | 0.285   |  0.148  | 0.104   | 0.078   |
-|Max runtime | 1.52    | 0.70    | 0.55    | 0.42    |
-
-
-
-### 10 Threads and polynomial degree of 7
-
-|Lines        | 1000    | 50000  |
-|:------------|:-------:|-------:|
-|Actual time  | 0.058   |121.192 |
-|Max runtime  | 0.26    |594     |
-
-
-
- Single thread  (Degree of Polynomial vs Time in sec): ![gras](reportextra/1.jpg)
- 
- 
- Multiple thread(No of threads vs Time in sec): ![gras](reportextra/2.jpg)	
 
 
