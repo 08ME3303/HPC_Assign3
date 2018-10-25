@@ -87,8 +87,8 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	//fptr = fopen("./cells", "r");
-	fptr = fopen("./test_data/cell_e5", "r");
+	fptr = fopen("./cells", "r");
+	//fptr = fopen("./test_data/cell_e5", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
@@ -252,7 +252,7 @@ void main(int argc, char** argv){
 				//printf("Program time: %lf \n", omp_get_wtime()-start_prog);
 				}
 			else{
-				printf("e5 case\n");
+				//printf("e5 case\n");
 				//read contents of file
 				char * file_buffer = (char*) malloc(sizeof(char) * file_size);
 				size_t result = fread ( file_buffer, 1, file_size, fptr );
@@ -327,7 +327,7 @@ void main(int argc, char** argv){
 				free(file_buffer);
 				free(possibilities);
 				free(Point);
-				printf("Program time: %lf\n", omp_get_wtime()-start_prog);
+				//printf("Program time: %lf\n", omp_get_wtime()-start_prog);
 				}
 			}
 	}
