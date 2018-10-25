@@ -6,12 +6,12 @@
 #include <xmmintrin.h>
 
 typedef struct points{
-	//int x;
-	//int y;
-	//int z;
-	short x;
-	short y;
-	short z;
+	float x;
+	float y;
+	float z;
+	//short x;
+	//short y;
+	//short z;
 	}points;
 	
 void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
@@ -131,9 +131,12 @@ void main(int argc, char** argv){
 					if (file_buffer[loc] == c2){
 						rows[column] = atof(char_buff);
 						column = 0;
-						Point[row_id].x = rows[0]*1000;
-						Point[row_id].y = rows[1]*1000;
-						Point[row_id].z = rows[2]*1000;
+						//Point[row_id].x = rows[0]*1000;
+						//Point[row_id].y = rows[1]*1000;
+						//Point[row_id].z = rows[2]*1000;
+						Point[row_id].x = rows[0];
+						Point[row_id].y = rows[1];
+						Point[row_id].z = rows[2];
 						row_id++;
 						char_id = 0;
 						}
@@ -162,7 +165,12 @@ void main(int argc, char** argv){
 			#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 			for ( i = 0; i < ROWS; i++){
 				for ( j = i+1; j < ROWS; j++ ) {
-					temporary = (pow((Point[i].x/1000.0 - Point[j].x/1000.0),2) + pow((Point[i].y/1000.0-Point[j].y/1000.0),2) + pow((Point[i].z/1000.0-Point[j].z/1000.0),2));
+					//x1 = Point[i].x/1000.0 - Point[j].x/1000.0;
+					//y1 = Point[i].y/1000.0 - Point[j].y/1000.0;
+					//z1 = Point[i].z/1000.0 - Point[j].z/1000.0;
+					//temporary = (pow((Point[i].x/1000.0 - Point[j].x/1000.0),2) + pow((Point[i].y/1000.0-Point[j].y/1000.0),2) + pow((Point[i].z/1000.0-Point[j].z/1000.0),2));
+					temporary = (pow((Point[i].x- Point[j].x),2) + pow((Point[i].y-Point[j].y),2) + pow((Point[i].z-Point[j].z),2));
+					//temporary = x1*x1 + y1*y1 + z1*z1;
 					distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 					possibilities[distance]++;
 					}
@@ -177,6 +185,7 @@ void main(int argc, char** argv){
 			free(file_buffer);
 			free(possibilities);
 			free(Point);
+			printf("Program time: %lf\n", omp_get_wtime()-start_prog);
 			}
 		else{
 			long block = 0.1*file_size;
@@ -232,5 +241,6 @@ void main(int argc, char** argv){
 	free(Point1);
 	free(Point2);
 	free(possibilities);
+	printf("Program time: %lf \n", omp_get_wtime()-start_prog);
 		}
 	}
