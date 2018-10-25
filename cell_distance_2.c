@@ -11,9 +11,13 @@ typedef struct points{
 	float z;
 	}points;
 	
+int nTHREADS;
+	
 void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = 0; jx < jmax/24; jx++ ){
 			temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
@@ -26,6 +30,8 @@ void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * poss
 void dist_intra(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = ix+1; jx < jmax/24; jx++ ){
 
@@ -71,7 +77,6 @@ void parse ( char * file, int n, points * Point ){
 	
 void main(int argc, char** argv){
 	
-	int nTHREADS;
 	if (argc == 2){
 		nTHREADS=strtol((strtok(argv[1], "-t")),NULL,10); 
 		}
@@ -85,8 +90,8 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	//fptr = fopen("./cells", "r");
-	fptr = fopen("./test_data/cell_e5", "r");
+	fptr = fopen("./cells", "r");
+	//fptr = fopen("./test_data/cell_e5", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
@@ -133,6 +138,7 @@ void main(int argc, char** argv){
 		fseek(fptr, 0, SEEK_SET);
 		
 		for ( jblock = iblock; jblock < file_size; jblock += block ){
+			fseek(fptr, jblock, SEEK_SET);
 			jm = (jblock + block < file_size)? (jblock + block) : file_size;
 			file2 = fread(file_buff2, sizeof(char), jm-jblock, fptr);
 			parse(file_buff2, jm-jblock, Point2);
@@ -144,13 +150,16 @@ void main(int argc, char** argv){
 				}
 			}		
 		} 
+	int num_ops = 0;
 		
 	for ( int mx = 0; mx < 3465; mx++ ){
 		if(possibilities[mx]!=0){
+			num_ops += possibilities[mx];
 			printf("%.2f %d\n", mx/100.0, possibilities[mx]);
 			}
 		}
 		
+	//printf("Total operations %d\n", num_ops);
 	free(file_buff1);
 	free(file_buff2);
 	free(Point1);
