@@ -159,7 +159,7 @@ void main(int argc, char** argv){
 			}
 		}
 		
-	printf("Total time: %lf\n", omp_get_wtime()-start_prog);
+	//printf("Total time: %lf\n", omp_get_wtime()-start_prog);
 	free(file_buff1);
 	free(file_buff2);
 	free(Point1);
