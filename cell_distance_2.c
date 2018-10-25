@@ -20,7 +20,8 @@ void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * poss
 	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = 0; jx < jmax/24; jx++ ){
-			temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
+			temporary = ((Point1[ix].x - Point2[jx].x)*(Point1[ix].x - Point2[jx].x)) + ((Point1[ix].y-Point2[jx].y)*(Point1[ix].y-Point2[jx].y)) + ((Point1[ix].z-Point2[jx].z)*(Point1[ix].z-Point2[jx].z));
+			//temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
 			distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 			possibilities[distance]++;
 			}
@@ -34,8 +35,8 @@ void dist_intra(points * Point1, int imax, points * Point2, int jmax, int * poss
 	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = ix+1; jx < jmax/24; jx++ ){
-
-			temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
+			temporary = ((Point1[ix].x - Point2[jx].x)*(Point1[ix].x - Point2[jx].x)) + ((Point1[ix].y-Point2[jx].y)*(Point1[ix].y-Point2[jx].y)) + ((Point1[ix].z-Point2[jx].z)*(Point1[ix].z-Point2[jx].z));
+			//temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
 			distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 			possibilities[distance]++;
 			}
@@ -90,8 +91,8 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./cells", "r");
-	//fptr = fopen("./test_data/cell_e5", "r");
+	//fptr = fopen("./cells", "r");
+	fptr = fopen("./test_data/cell_e5", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
