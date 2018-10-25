@@ -49,7 +49,6 @@ void parse ( char * file, int n, points * Point ){
 	float rows[3] = {0.0, 0.0, 0.0};
 	int row_id = 0, column = 0, char_id = 0, imax, jmax;
 	char c1 = ' ', c2 = '\n';
-	//printf("%d\n", n);
 		
 	for ( int loc = 0; loc < n; loc++){
 		if (file[loc] == c1){
@@ -91,8 +90,8 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	//fptr = fopen("./cells", "r");
-	fptr = fopen("./test_data/cell_e5", "r");
+	fptr = fopen("./cells", "r");
+	//fptr = fopen("./test_data/cell_e5", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
