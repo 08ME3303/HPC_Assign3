@@ -6,12 +6,9 @@
 #include <xmmintrin.h>
 
 typedef struct points{
-	//int x;
-	//int y;
-	//int z;
-	short x;
-	short y;
-	short z;
+	float x;
+	float y;
+	float z;
 	}points;
 	
 void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
@@ -71,6 +68,7 @@ void parse ( char * file, int n, points * Point ){
 		}
 	}
 	
+	
 void main(int argc, char** argv){
 	
 	int nTHREADS;
@@ -81,12 +79,15 @@ void main(int argc, char** argv){
 		printf("Incorrect number of arguments\n");
 		return;
 		}
+		
+	double start = omp_get_wtime();
 	
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./cells", "r");
-	//fptr = fopen("./test_data/cell_e5", "r");
+	//fptr = fopen("./cells", "r");
+	fptr = fopen("./test_data/cell_e5", "r");
+	
 	//get number of coordintes in the file
 	long SIZE = 0;
    	char ch;
@@ -102,84 +103,7 @@ void main(int argc, char** argv){
 	long file_size = ftell(fptr);
 	fseek(fptr, 0, SEEK_SET);
 	
-	char capacity = (file_size>1e7)?('l'):('s');
-	
-	if ( capacity == 's'){
-			//printf("entered small file handling\n");
-			//read contents of file
-			char * file_buffer = (char*) malloc(sizeof(char) * file_size);
-			size_t result = fread ( file_buffer, 1, file_size, fptr );
-			
-			//array of points
-			points * Point = (points*)malloc(sizeof(points)*ROWS);
-			
-			char char_buff[10];
-			float rows[3] = {0.0, 0.0, 0.0};
-			int row_id = 0, column = 0, char_id = 0;
-			char c1 = ' ', c2 = '\n';
-			double start = omp_get_wtime();
-
-			//parsing file for necessary data	
-
-			for ( int loc = 0; loc < file_size; loc++){
-				if (file_buffer[loc] == c1){
-					rows[column] = atof(char_buff);
-					column++;
-					char_id = 0;
-					}
-				else{
-					if (file_buffer[loc] == c2){
-						rows[column] = atof(char_buff);
-						column = 0;
-						Point[row_id].x = rows[0]*1000;
-						Point[row_id].y = rows[1]*1000;
-						Point[row_id].z = rows[2]*1000;
-						row_id++;
-						char_id = 0;
-						}
-					else{
-						char_buff[char_id] = file_buffer[loc];
-						char_id++;
-						}
-					}
-				}
-				
-			fclose(fptr);
-				
-			//distance calculator
-			long long int n = (ROWS * (ROWS-1))/2;
-			int distance = 0;
-			int * possibilities = (int*)calloc(3465, sizeof(int));
-				
-			//long long int num_ops = 0;	
-			int i,j;
-			float x1, y1, z1;
-
-			float temporary;
-			double start_distance1 = omp_get_wtime();		
-			
-			omp_set_num_threads(nTHREADS);
-			#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
-			for ( i = 0; i < ROWS; i++){
-				for ( j = i+1; j < ROWS; j++ ) {
-					temporary = (pow((Point[i].x/1000.0 - Point[j].x/1000.0),2) + pow((Point[i].y/1000.0-Point[j].y/1000.0),2) + pow((Point[i].z/1000.0-Point[j].z/1000.0),2));
-					distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
-					possibilities[distance]++;
-					}
-				}	
-				
-			double end_distance1 = omp_get_wtime();
-				
-			for ( int i = 0; i < 3465; i++){
-				printf("%.2lf %d\n", i/100.0, possibilities[i]);
-				}
-			
-			free(file_buffer);
-			free(possibilities);
-			free(Point);
-			}
-		else{
-			long block = 0.1*file_size;
+	long block = 0.1*file_size;
 	points * Point1 = (points*) malloc(sizeof(points)*block);
 	points * Point2 = (points*) malloc(sizeof(points)*block);
 	int * possibilities = (int *) calloc(3465, sizeof(int));
@@ -232,5 +156,5 @@ void main(int argc, char** argv){
 	free(Point1);
 	free(Point2);
 	free(possibilities);
-		}
 	}
+	
