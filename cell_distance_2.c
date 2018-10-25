@@ -90,8 +90,8 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./cells", "r");
-	//fptr = fopen("./test_data/cell_e5", "r");
+	//fptr = fopen("./cells", "r");
+	fptr = fopen("./test_data/cell_e5", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
@@ -159,7 +159,7 @@ void main(int argc, char** argv){
 			}
 		}
 		
-	//printf("Total operations %d\n", num_ops);
+	printf("Total time: %lf\n", omp_get_wtime()-start_prog);
 	free(file_buff1);
 	free(file_buff2);
 	free(Point1);
