@@ -170,6 +170,7 @@ the average over 10 executions of the program. The target times and the actual
 times are listed below:
 
 
+
 |FileSize    | No of Threads       |    TargetTime(sec)   | Actual Time(sec)        | 
 |:-----------|:-------------------:|:--------------------:|:-----------------------:|
 |1e4 	     | 1                   |  0.41                | 0.27                    | 
@@ -178,4 +179,7 @@ times are listed below:
 |1e5 	     | 20                  |  2.60                | 1.49                    | 
 
 
- 
+ # Further Work
+As can be seen with the square root intrinsics, the speed of the program execution increases significantly. This can be extended to the other mathematical operations, for instance, with the calculation of the variable temporary. One such example would be performing the subtraction and power operations using \_mm_set_ps to vectorize the operations. 
+Since the file is knows to contain values upto 3 decimal places, it could also be worth considering multiplying the parsed input by 1000 and storing them as integers in the struct points. 
+Furthermore, the file parsing and distance calculations operations in blocks can be extended efficiently to handle smaller file sizes. 
