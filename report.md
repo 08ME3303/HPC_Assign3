@@ -109,7 +109,7 @@ size_t result = fread ( file_buffer, 1, file_size, fptr );
   For files larger than 1 GiB limit, the idea is to perform the task in blocks.
 The file reading, parsing and operations are performed in two blocks and the
 math operations are performed between the blocks. The block size was chosen
-as 10% of the file size (which for the limiting case of file size, 2 32 , results in
+as 10% of the file size (which for the limiting case of file size, 2^32 , results in
 block size of approximates 400 MiB).
 
   ~~~
