@@ -11,6 +11,12 @@ typedef struct points{
 	float z;
 	}points;
 	
+typedef struct point5{
+	short x;
+	short y;
+	short z;
+	}point5;
+	
 void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
@@ -81,8 +87,8 @@ void main(int argc, char** argv){
 	//opening file
 	FILE * fptr;
 	double start_prog = omp_get_wtime();
-	fptr = fopen("./cells", "r");
-	//fptr = fopen("./test_data/cell_e5", "r");
+	//fptr = fopen("./cells", "r");
+	fptr = fopen("./test_data/cell_e5", "r");
 	
 	//get number of coordintes in the file
 	long SIZE = 0;
@@ -99,7 +105,18 @@ void main(int argc, char** argv){
 	long file_size = ftell(fptr);
 	fseek(fptr, 0, SEEK_SET);
 	
-	char capacity = (file_size>1e7)?('l'):('s');
+	char capacity;
+	if ( ROWS <= 2e4 ){
+		capacity = 's';
+		}
+	else{
+		if ( ROWS == 1e5 ){
+			 capacity = 'm';
+			 }
+		else {
+			capacity = 'l';
+			}
+		}
 	
 	if ( capacity == 's'){
 
@@ -178,59 +195,139 @@ void main(int argc, char** argv){
 			}
 			
 		else{
-			long block = 0.1*file_size;
-		points * Point1 = (points*) malloc(sizeof(points)*block);
-		points * Point2 = (points*) malloc(sizeof(points)*block);
-		int * possibilities = (int *) calloc(3465, sizeof(int));
-		
-		char * file_buff1 = (char *) malloc( block * sizeof(char));
-		size_t file1;
-		char * file_buff2 = (char *) malloc( block * sizeof(char));
-		size_t file2;
-		
-		char char_buff[10];
-		float rows[3] = {0.0, 0.0, 0.0};
-		float rows1[3] = {0.0,0.0,0.0};
-		int row_id = 0, column = 0, char_id = 0, imax, jmax;
-		char c1 = ' ', c2 = '\n';
-		
-		int iblock, jblock, m = 0, im, jm;
-		float temporary;
-		int distance;	
-			
-		for ( iblock = 0; iblock < file_size; iblock += block ){
+			if ( capacity == 'l'){
+				long block = 0.1*file_size;
+				points * Point1 = (points*) malloc(sizeof(points)*block);
+				points * Point2 = (points*) malloc(sizeof(points)*block);
+				int * possibilities = (int *) calloc(3465, sizeof(int));
+				
+				char * file_buff1 = (char *) malloc( block * sizeof(char));
+				size_t file1;
+				char * file_buff2 = (char *) malloc( block * sizeof(char));
+				size_t file2;
+				
+				char char_buff[10];
+				float rows[3] = {0.0, 0.0, 0.0};
+				float rows1[3] = {0.0,0.0,0.0};
+				int row_id = 0, column = 0, char_id = 0, imax, jmax;
+				char c1 = ' ', c2 = '\n';
+				
+				int iblock, jblock, m = 0, im, jm;
+				float temporary;
+				int distance;	
+					
+				for ( iblock = 0; iblock < file_size; iblock += block ){
 
-			fseek(fptr, iblock, SEEK_SET);
-			im = (iblock + block < file_size)? (iblock + block) : file_size;
-			file1 = fread(file_buff1, sizeof(char), im-iblock, fptr);
-			parse(file_buff1, im-iblock, Point1);		
-			
-			fseek(fptr, 0, SEEK_SET);
-			
-			for ( jblock = iblock; jblock < file_size; jblock += block ){
-				jm = (jblock + block < file_size)? (jblock + block) : file_size;
-				file2 = fread(file_buff2, sizeof(char), jm-jblock, fptr);
-				parse(file_buff2, jm-jblock, Point2);
-				if(jblock == iblock){
-					dist_intra(Point1, im-iblock, Point2, jm-jblock, possibilities);
+					fseek(fptr, iblock, SEEK_SET);
+					im = (iblock + block < file_size)? (iblock + block) : file_size;
+					file1 = fread(file_buff1, sizeof(char), im-iblock, fptr);
+					parse(file_buff1, im-iblock, Point1);		
+					
+					fseek(fptr, 0, SEEK_SET);
+					
+					for ( jblock = iblock; jblock < file_size; jblock += block ){
+						jm = (jblock + block < file_size)? (jblock + block) : file_size;
+						file2 = fread(file_buff2, sizeof(char), jm-jblock, fptr);
+						parse(file_buff2, jm-jblock, Point2);
+						if(jblock == iblock){
+							dist_intra(Point1, im-iblock, Point2, jm-jblock, possibilities);
+							}
+						else{
+							dist_inter(Point1, im-iblock, Point2, jm-jblock, possibilities);
+							}
+						}		
+					} 
+					
+				for ( int mx = 0; mx < 3465; mx++ ){
+					if(possibilities[mx]!=0){
+						printf("%.2f %d\n", mx/100.0, possibilities[mx]);
+						}
 					}
-				else{
-					dist_inter(Point1, im-iblock, Point2, jm-jblock, possibilities);
+					
+				free(file_buff1);
+				free(file_buff2);
+				free(Point1);
+				free(Point2);
+				free(possibilities);
+				//printf("Program time: %lf \n", omp_get_wtime()-start_prog);
+				}
+			else{
+				printf("e5 case\n");
+				//read contents of file
+				char * file_buffer = (char*) malloc(sizeof(char) * file_size);
+				size_t result = fread ( file_buffer, 1, file_size, fptr );
+				
+				//array of points
+				point5 * Point = (point5*)malloc(sizeof(point5)*ROWS);
+				
+				char char_buff[10];
+				float rows[3] = {0.0, 0.0, 0.0};
+				int row_id = 0, column = 0, char_id = 0;
+				char c1 = ' ', c2 = '\n';
+				double start = omp_get_wtime();
+
+				//parsing file for necessary data	
+
+				for ( int loc = 0; loc < file_size; loc++){
+					if (file_buffer[loc] == c1){
+						rows[column] = atof(char_buff);
+						column++;
+						char_id = 0;
+						}
+					else{
+						if (file_buffer[loc] == c2){
+							rows[column] = atof(char_buff);
+							column = 0;
+							Point[row_id].x = rows[0]*1000;
+							Point[row_id].y = rows[1]*1000;
+							Point[row_id].z = rows[2]*1000;
+							row_id++;
+							char_id = 0;
+							}
+						else{
+							char_buff[char_id] = file_buffer[loc];
+							char_id++;
+							}
+						}
 					}
-				}		
-			} 
-			
-		for ( int mx = 0; mx < 3465; mx++ ){
-			if(possibilities[mx]!=0){
-				printf("%.2f %d\n", mx/100.0, possibilities[mx]);
+					
+				fclose(fptr);
+					
+				//distance calculator
+				long long int n = (ROWS * (ROWS-1))/2;
+				int distance = 0;
+				int * possibilities = (int*)calloc(3465, sizeof(int));
+					
+				//long long int num_ops = 0;	
+				int i,j;
+				int x1, y1, z1;
+
+				float temporary;
+				double start_distance1 = omp_get_wtime();		
+				
+				omp_set_num_threads(nTHREADS);
+				#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
+				for ( i = 0; i < ROWS; i++){
+					for ( j = i+1; j < ROWS; j++ ) {
+						x1 = (Point[i].x- Point[j].x)*(Point[i].x- Point[j].x);
+						y1 = ((Point[i].y-Point[j].y)*(Point[i].y-Point[j].y));
+						z1 = ((Point[i].z-Point[j].z)*(Point[i].z-Point[j].z));
+						temporary = (x1 + y1 + z1)/1000000.0;
+						distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
+						possibilities[distance]++;
+						}
+					}	
+					
+				double end_distance1 = omp_get_wtime();
+					
+				for ( int i = 0; i < 3465; i++){
+					printf("%.2lf %d\n", i/100.0, possibilities[i]);
+					}
+				
+				free(file_buffer);
+				free(possibilities);
+				free(Point);
+				printf("Program time: %lf\n", omp_get_wtime()-start_prog);
 				}
 			}
-			
-		free(file_buff1);
-		free(file_buff2);
-		free(Point1);
-		free(Point2);
-		free(possibilities);
-		//printf("Program time: %lf \n", omp_get_wtime()-start_prog);
-		}
 	}
