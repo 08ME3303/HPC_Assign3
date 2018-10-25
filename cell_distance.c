@@ -17,6 +17,8 @@ typedef struct point5{
 	short z;
 	}point5;
 	
+int nTHREADS;
+	
 void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
@@ -32,6 +34,8 @@ void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * poss
 void dist_intra(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = ix+1; jx < jmax/24; jx++ ){
 
@@ -75,7 +79,6 @@ void parse ( char * file, int n, points * Point ){
 	
 void main(int argc, char** argv){
 	
-	int nTHREADS;
 	if (argc == 2){
 		nTHREADS=strtol((strtok(argv[1], "-t")),NULL,10); 
 		}
