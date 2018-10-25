@@ -13,6 +13,7 @@ typedef struct points{
 	
 int nTHREADS;
 	
+//function to calculate the distances in the same block
 void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
@@ -21,13 +22,13 @@ void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * poss
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = 0; jx < jmax/24; jx++ ){
 			temporary = ((Point1[ix].x - Point2[jx].x)*(Point1[ix].x - Point2[jx].x)) + ((Point1[ix].y-Point2[jx].y)*(Point1[ix].y-Point2[jx].y)) + ((Point1[ix].z-Point2[jx].z)*(Point1[ix].z-Point2[jx].z));
-			//temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
 			distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 			possibilities[distance]++;
 			}
 		}
 	}
 	
+//function to calculate the distances between blocks
 void dist_intra(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
@@ -36,13 +37,13 @@ void dist_intra(points * Point1, int imax, points * Point2, int jmax, int * poss
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = ix+1; jx < jmax/24; jx++ ){
 			temporary = ((Point1[ix].x - Point2[jx].x)*(Point1[ix].x - Point2[jx].x)) + ((Point1[ix].y-Point2[jx].y)*(Point1[ix].y-Point2[jx].y)) + ((Point1[ix].z-Point2[jx].z)*(Point1[ix].z-Point2[jx].z));
-			//temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
 			distance = 100*(_mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(temporary))));
 			possibilities[distance]++;
 			}
 		}
 	}
 	
+//function to read file buffer and parse it to x,y,z co-ordinates
 void parse ( char * file, int n, points * Point ){
 
 	char char_buff[10];
@@ -100,8 +101,8 @@ void main(int argc, char** argv){
        if (ch == '\n' || ch == ' ')
            SIZE++;
    	}
-   	
    	long ROWS = SIZE/3;
+   	
    	//get size of file
    	rewind(fptr);
    	fseek(fptr, 0, SEEK_END);
@@ -118,16 +119,11 @@ void main(int argc, char** argv){
 	char * file_buff2 = (char *) malloc( block * sizeof(char));
 	size_t file2;
 	
-	char char_buff[10];
-	float rows[3] = {0.0, 0.0, 0.0};
-	float rows1[3] = {0.0,0.0,0.0};
-	int row_id = 0, column = 0, char_id = 0, imax, jmax;
-	char c1 = ' ', c2 = '\n';
-	
 	int iblock, jblock, m = 0, im, jm;
 	float temporary;
 	int distance;	
 		
+	//outer for loop for the first block read
 	for ( iblock = 0; iblock < file_size; iblock += block ){
 
 		fseek(fptr, iblock, SEEK_SET);
@@ -137,11 +133,14 @@ void main(int argc, char** argv){
 		
 		fseek(fptr, 0, SEEK_SET);
 		
+		//inner for loop for the second block read
 		for ( jblock = iblock; jblock < file_size; jblock += block ){
 			fseek(fptr, jblock, SEEK_SET);
 			jm = (jblock + block < file_size)? (jblock + block) : file_size;
 			file2 = fread(file_buff2, sizeof(char), jm-jblock, fptr);
+			
 			parse(file_buff2, jm-jblock, Point2);
+			
 			if(jblock == iblock){
 				dist_intra(Point1, im-iblock, Point2, jm-jblock, possibilities);
 				}
@@ -150,16 +149,16 @@ void main(int argc, char** argv){
 				}
 			}		
 		} 
-	int num_ops = 0;
 		
 	for ( int mx = 0; mx < 3465; mx++ ){
+		//printing non-zero entries only for convenience
 		if(possibilities[mx]!=0){
-			num_ops += possibilities[mx];
 			printf("%.2f %d\n", mx/100.0, possibilities[mx]);
 			}
 		}
 		
 	//printf("Total time: %lf\n", omp_get_wtime()-start_prog);
+	//freeing heap allocations
 	free(file_buff1);
 	free(file_buff2);
 	free(Point1);
