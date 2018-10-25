@@ -22,6 +22,8 @@ int nTHREADS;
 void dist_inter(points * Point1, int imax, points * Point2, int jmax, int * possibilities){
 	float temporary;
 	int distance;
+	omp_set_num_threads(nTHREADS);
+	#pragma omp parallel for schedule(dynamic, 10) reduction(+:possibilities[:3465])
 	for ( int ix = 0; ix < imax/24; ix++ ){
 		for ( int jx = 0; jx < jmax/24; jx++ ){
 			temporary = pow((Point1[ix].x - Point2[jx].x),2) + pow((Point1[ix].y-Point2[jx].y),2) + pow((Point1[ix].z-Point2[jx].z),2);
