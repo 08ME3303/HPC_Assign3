@@ -8,7 +8,7 @@
 The goal of the assignment is to implement multi-threading using OpenMP to achieve task and data parallelism. OpenMP is an API that provides a simple way for parallelism using threads on a shared memory computers. The OpenMP implementation of multi-threading is done by forking from the master thread into set number of slave threads which run concurrently, with the runtime environment allocating them to different processors. OpenMP is particularly well-suited for fine grained parallelism and the programmer needs to perform lesser control of execution flow and memory usage than POSIX threads.
 
 ## Problem Description
-The problem statement given includes a text file containing a list of co-ordinates.The file must be parsed, and the distances between all points calculated. Theoutput of the program is the frequency of round-off for each calculated distance.The co-ordinates are known to be in the range −10 to 10 and the file input canhave up to 2 32 rows. Another constraint given is that the program may not consume more than 1GiB of memory.
+The problem statement given includes a text file containing a list of co-ordinates.The file must be parsed, and the distances between all points calculated. The output of the program is the frequency of round-off for each calculated distance.The co-ordinates are known to be in the range −10 to 10 and the file input canhave up to 2 32 rows. Another constraint given is that the program may not consume more than 1GiB of memory.
 The problem can be divided into the following sub-tasks:
 * Reading the file and parsing the input
 * Calculating Distance between points
