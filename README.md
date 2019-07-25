@@ -1,6 +1,7 @@
-# HPC_Assign3
+# High Performance Computing
 # Assigment 3 - HPC 039
 ## Introduction
+## http://github.com/08ME3303
 
 The goal of the assignment is to implement multi-threading using OpenMP to achieve task and data parallelism. OpenMP is an API that provides a simple way for parallelism using threads on a shared memory computers. The OpenMP implementation of multi-threading is done by forking from the master thread into set number of slave threads which run concurrently, with the runtime environment allocating them to different processors. OpenMP is particularly well-suited for fine grained parallelism and the programmer needs to perform lesser control of execution flow and memory usage than POSIX threads.
 
